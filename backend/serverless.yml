@@ -1,0 +1,63 @@
+service: dunkin-pos-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    MENU_TABLE: ${self:service}-menu-${opt:stage, 'dev'}
+    ORDERS_TABLE: ${self:service}-orders-${opt:stage, 'dev'}
+    INVENTORY_TABLE: ${self:service}-inventory-${opt:stage, 'dev'}
+  
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:service}-*"
+
+functions:
+  getMenu:
+    handler: handlers/menu.getMenu
+    events:
+      - http:
+          path: menu
+          method: get
+          cors: true
+  
+  createOrder:
+    handler: handlers/orders.createOrder
+    events:
+      - http:
+          path: orders
+          method: post
+          cors: true
+  
+  updateInventory:
+    handler: handlers/inventory.updateInventory
+    events:
+      - http:
+          path: inventory/{id}
+          method: put
+          cors: true
+
+resources:
+  Resources:
+    MenuTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-menu-${opt:stage, 'dev'}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
