@@ -2,8 +2,21 @@ const AWS = require('aws-sdk');
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 exports.updateInventory = async (event) => {
-    const itemId = event.pathParameters.id;
-    const updates = JSON.parse(event.body);
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+            },
+            body: '',
+        };
+    }
+    
+    const itemId = event.pathParameters?.id;
+    const updates = JSON.parse(event.body || '{}');
     
     const params = {
         TableName: process.env.INVENTORY_TABLE,
@@ -32,9 +45,11 @@ exports.updateInventory = async (event) => {
             statusCode: 200,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(result.Attributes),
+            body: JSON.stringify(result.Attributes || {}),
         };
     } catch (error) {
         console.error('Update inventory error:', error);
@@ -42,7 +57,8 @@ exports.updateInventory = async (event) => {
             statusCode: 500,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ error: 'Failed to update inventory' }),
         };

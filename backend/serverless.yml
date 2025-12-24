@@ -28,7 +28,12 @@ functions:
       - http:
           path: menu
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   createMenuItem:
     handler: handlers/menu.createMenuItem
@@ -36,7 +41,21 @@ functions:
       - http:
           path: menu
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: menu
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   createOrder:
     handler: handlers/orders.createOrder
@@ -44,7 +63,21 @@ functions:
       - http:
           path: orders
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: orders
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   getOrders:
     handler: handlers/orders.getOrders
@@ -52,7 +85,12 @@ functions:
       - http:
           path: orders
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   updateInventory:
     handler: handlers/inventory.updateInventory
@@ -60,7 +98,21 @@ functions:
       - http:
           path: inventory/{id}
           method: put
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: inventory/{id}
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   getInventory:
     handler: handlers/inventory.getInventory
@@ -68,7 +120,12 @@ functions:
       - http:
           path: inventory
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
   
   login:
     handler: handlers/auth.login

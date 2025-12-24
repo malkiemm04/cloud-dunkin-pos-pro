@@ -6,6 +6,19 @@ exports.getMenu = async (event) => {
         TableName: process.env.MENU_TABLE,
     };
     
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+            },
+            body: '',
+        };
+    }
+    
     try {
         const data = await dynamoDB.scan(params).promise();
         
@@ -19,22 +32,42 @@ exports.getMenu = async (event) => {
             statusCode: 200,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data.Items),
+            body: JSON.stringify(data.Items || []),
         };
     } catch (error) {
         console.error('DynamoDB error:', error);
         return {
             statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ error: 'Failed to retrieve menu' }),
         };
     }
 };
 
 exports.createMenuItem = async (event) => {
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+            },
+            body: '',
+        };
+    }
+    
     try {
-        const item = JSON.parse(event.body);
+        const item = JSON.parse(event.body || '{}');
         
         // Use provided ID or generate new one
         const itemId = item.id || require('crypto').randomUUID();
@@ -61,9 +94,9 @@ exports.createMenuItem = async (event) => {
             statusCode: 201,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
                 'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ 
                 message: 'Item created successfully',
@@ -76,9 +109,10 @@ exports.createMenuItem = async (event) => {
             statusCode: 500,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ error: 'Failed to create item' }),
+            body: JSON.stringify({ error: 'Failed to create item', details: error.message }),
         };
     }
 };
