@@ -116,3 +116,157 @@ exports.createMenuItem = async (event) => {
         };
     }
 };
+
+exports.updateMenuItem = async (event) => {
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+            },
+            body: '',
+        };
+    }
+    
+    try {
+        const itemId = event.pathParameters?.id;
+        if (!itemId) {
+            return {
+                statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ error: 'Item ID is required' }),
+            };
+        }
+        
+        const updates = JSON.parse(event.body || '{}');
+        
+        // Build update expression dynamically
+        const updateExpressions = [];
+        const expressionAttributeNames = {};
+        const expressionAttributeValues = {};
+        
+        Object.keys(updates).forEach(key => {
+            if (key !== 'id' && key !== 'createdAt') {
+                updateExpressions.push(`#${key} = :${key}`);
+                expressionAttributeNames[`#${key}`] = key;
+                expressionAttributeValues[`:${key}`] = updates[key];
+            }
+        });
+        
+        updateExpressions.push('updatedAt = :updatedAt');
+        expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+        
+        const params = {
+            TableName: process.env.MENU_TABLE,
+            Key: { id: itemId },
+            UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ReturnValues: 'ALL_NEW'
+        };
+        
+        const result = await dynamoDB.update(params).promise();
+        
+        console.log('Menu item updated successfully', {
+            itemId: itemId,
+            timestamp: new Date().toISOString()
+        });
+        
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                message: 'Item updated successfully',
+                item: result.Attributes
+            }),
+        };
+    } catch (error) {
+        console.error('Update item error:', error);
+        return {
+            statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ error: 'Failed to update item', details: error.message }),
+        };
+    }
+};
+
+exports.deleteMenuItem = async (event) => {
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+            },
+            body: '',
+        };
+    }
+    
+    try {
+        const itemId = event.pathParameters?.id;
+        if (!itemId) {
+            return {
+                statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ error: 'Item ID is required' }),
+            };
+        }
+        
+        const params = {
+            TableName: process.env.MENU_TABLE,
+            Key: { id: itemId }
+        };
+        
+        await dynamoDB.delete(params).promise();
+        
+        console.log('Menu item deleted successfully', {
+            itemId: itemId,
+            timestamp: new Date().toISOString()
+        });
+        
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                message: 'Item deleted successfully',
+                itemId: itemId
+            }),
+        };
+    } catch (error) {
+        console.error('Delete item error:', error);
+        return {
+            statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ error: 'Failed to delete item', details: error.message }),
+        };
+    }
+};

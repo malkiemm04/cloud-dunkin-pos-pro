@@ -4,6 +4,7 @@
   "description": "Cloud Dunkin' POS Pro Backend - Serverless AWS Lambda Functions",
   "main": "index.js",
   "scripts": {
+    "start": "serverless offline --stage dev",
     "deploy": "serverless deploy",
     "deploy:dev": "serverless deploy --stage dev",
     "deploy:prod": "serverless deploy --stage prod",

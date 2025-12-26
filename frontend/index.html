@@ -748,9 +748,22 @@
         </div>
 
         <!-- Admin Panel Tab -->
-        <div id="admin-tab" class="tab-content">
-            <h2><i class="fas fa-cog"></i> Admin Panel</h2>
-            <p style="color: #666; margin-bottom: 25px;">Manage menu, users, and system settings</p>
+        <div id="admin-tab" class="tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h2 style="margin: 0;"><i class="fas fa-cog"></i> Admin Panel</h2>
+                    <p style="color: #666; margin: 5px 0 0 0;">Manage menu, users, and system settings</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div id="adminProfileInfo" style="display: none; padding: 10px 15px; background: #e8f5e9; border-radius: 8px;">
+                        <i class="fas fa-user-circle"></i> 
+                        <span id="adminDisplayName" style="font-weight: 600; margin-left: 8px;"></span>
+                    </div>
+                    <button class="btn clear-btn" id="adminLogoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
             
             <div class="admin-grid">
                 <div class="admin-card">
@@ -770,6 +783,20 @@
                             <option value="coffee">Coffee</option>
                             <option value="drinks">Drinks</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description (Optional)</label>
+                        <input type="text" id="itemDescription" class="form-control" placeholder="e.g., Delicious chocolate glazed donut">
+                    </div>
+                    <div class="form-group">
+                        <label>Item Image</label>
+                        <input type="file" id="itemImage" class="form-control" accept="image/*" style="padding: 8px;">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            Upload image for menu item (JPG, PNG, GIF, WebP)
+                        </small>
+                        <div id="imagePreview" style="margin-top: 10px; display: none;">
+                            <img id="previewImg" src="" alt="Preview" style="max-width: 100%; max-height: 150px; border-radius: 8px; border: 2px solid #ddd;">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Initial Stock</label>
@@ -1004,6 +1031,87 @@
         </div>
     </div>
 
+    <!-- Admin Login Modal -->
+    <div class="payment-modal" id="adminLoginModal" style="display: none;">
+        <div class="payment-content">
+            <h2 style="color: #2c3e50; margin-bottom: 10px;">
+                <i class="fas fa-shield-alt"></i> Admin Authentication
+            </h2>
+            <p style="color: #666; margin-bottom: 20px;">Please login to access the Admin Panel</p>
+            
+            <div id="adminLoginError" class="error-message" style="display: none; background: #fee; color: #c33; padding: 10px; border-radius: 5px; margin-bottom: 15px;"></div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Admin Username</label>
+                <input type="text" id="adminLoginUsername" class="form-control" placeholder="Enter admin username" autocomplete="username">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Password</label>
+                <input type="password" id="adminLoginPassword" class="form-control" placeholder="Enter password" autocomplete="current-password">
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button class="btn clear-btn" id="cancelAdminLogin" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn checkout-btn" id="confirmAdminLogin" style="flex: 2;">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; font-size: 12px; color: #666;">
+                <strong>Demo Credentials:</strong><br>
+                Username: <code>admin</code><br>
+                Password: <code>admin123</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Inventory Item Modal -->
+    <div class="payment-modal" id="addInventoryModal" style="display: none;">
+        <div class="payment-content">
+            <h2 style="color: #2c3e50; margin-bottom: 10px;">
+                <i class="fas fa-plus-circle"></i> Add Inventory Item
+            </h2>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Item ID *</label>
+                <input type="text" class="form-control" id="inventoryItemId" placeholder="e.g., inv-001" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Item Name *</label>
+                <input type="text" class="form-control" id="inventoryItemName" placeholder="e.g., Coffee Beans" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Category</label>
+                <input type="text" class="form-control" id="inventoryItemCategory" placeholder="e.g., Supplies" value="General">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>Initial Quantity *</label>
+                    <input type="number" class="form-control" id="inventoryItemQuantity" placeholder="0" value="0" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Low Stock Alert</label>
+                    <input type="number" class="form-control" id="inventoryItemLowAlert" placeholder="10" value="10" min="0">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button class="btn clear-btn" id="cancelAddInventory" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn checkout-btn" id="confirmAddInventory" style="flex: 2; background: #27ae60;">
+                    <i class="fas fa-check"></i> Add Item
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ====================
         // CLOUD CONFIGURATION
@@ -1011,7 +1119,7 @@
         const CLOUD_CONFIG = {
             API_ENDPOINT: window.location.hostname.includes('localhost') 
                 ? 'http://localhost:3000' 
-                : 'https://izr5wkzc0a.execute-api.us-east-1.amazonaws.com/dev',
+                : 'https://xwy642cm99.execute-api.us-east-1.amazonaws.com/dev',
             REGION: 'us-east-1',
             ENABLED: true // Cloud connection enabled
         };
@@ -1051,7 +1159,16 @@
                     
                     if (response.ok) {
                         const data = await response.json();
-                        this.menuItems = data.length > 0 ? data : this.getDefaultMenu();
+                        // Ensure all items have proper structure, including imageUrl
+                        const getIcon = (cat) => {
+                            const icons = { donuts: '🍩', coffee: '☕', drinks: '🥤' };
+                            return icons[cat] || '📦';
+                        };
+                        this.menuItems = data.length > 0 ? data.map(item => ({
+                            ...item,
+                            imageUrl: item.imageUrl || null, // Preserve imageUrl if it exists
+                            icon: item.icon || getIcon(item.category || 'donuts')
+                        })) : this.getDefaultMenu();
                     } else {
                         this.menuItems = this.getDefaultMenu();
                     }
@@ -1350,15 +1467,133 @@
             }
             
             initMenuManagement() {
+                // Image preview handler
+                const imageInput = document.getElementById('itemImage');
+                const imagePreview = document.getElementById('imagePreview');
+                const previewImg = document.getElementById('previewImg');
+                
+                imageInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Validate file type
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                        if (!allowedTypes.includes(file.type)) {
+                            alert('Please select a valid image file (JPG, PNG, GIF, or WebP)');
+                            e.target.value = '';
+                            imagePreview.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Image file is too large. Please select an image smaller than 5MB.');
+                            e.target.value = '';
+                            imagePreview.style.display = 'none';
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewImg.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                            previewImg.style.display = 'block';
+                        };
+                        reader.onerror = () => {
+                            alert('Error reading image file. Please try again.');
+                            e.target.value = '';
+                            imagePreview.style.display = 'none';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        imagePreview.style.display = 'none';
+                    }
+                });
+                
                 document.getElementById('addMenuItem').addEventListener('click', async () => {
                     const name = document.getElementById('itemName').value;
                     const price = parseFloat(document.getElementById('itemPrice').value);
                     const category = document.getElementById('itemCategory').value;
+                    const description = document.getElementById('itemDescription').value;
                     const stock = parseInt(document.getElementById('itemStock').value);
+                    const imageFile = document.getElementById('itemImage').files[0];
                     
                     if (!name || !price) {
                         alert('Please fill in required fields');
                         return;
+                    }
+                    
+                    let imageUrl = null;
+                    
+                    // Upload image if provided
+                    if (imageFile) {
+                        try {
+                            // Show loading message
+                            const addButton = document.getElementById('addMenuItem');
+                            const originalText = addButton.innerHTML;
+                            addButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading image...';
+                            addButton.disabled = true;
+                            
+                            // Get presigned URL from API
+                            const uploadResponse = await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/images/upload-url`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('id_token') || 'demo'}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    fileName: imageFile.name,
+                                    fileType: imageFile.type
+                                })
+                            });
+                            
+                            if (uploadResponse.ok) {
+                                const { uploadUrl, imageUrl: cdnUrl } = await uploadResponse.json();
+                                
+                                // Upload file to S3 using presigned URL
+                                const uploadResult = await fetch(uploadUrl, {
+                                    method: 'PUT',
+                                    body: imageFile,
+                                    headers: {
+                                        'Content-Type': imageFile.type
+                                    }
+                                });
+                                
+                                if (uploadResult.ok) {
+                                    imageUrl = cdnUrl;
+                                    console.log('Image uploaded successfully:', imageUrl);
+                                } else {
+                                    console.error('Failed to upload image to S3');
+                                    // Try local storage as fallback
+                                    const localUrl = URL.createObjectURL(imageFile);
+                                    imageUrl = localUrl;
+                                    console.log('Using local image URL as fallback');
+                                }
+                            } else {
+                                console.error('Failed to get upload URL');
+                                // Try local storage as fallback
+                                const localUrl = URL.createObjectURL(imageFile);
+                                imageUrl = localUrl;
+                                console.log('Using local image URL as fallback');
+                            }
+                            
+                            // Restore button
+                            addButton.innerHTML = originalText;
+                            addButton.disabled = false;
+                        } catch (error) {
+                            console.error('Error uploading image:', error);
+                            // Try local storage as fallback
+                            try {
+                                const localUrl = URL.createObjectURL(imageFile);
+                                imageUrl = localUrl;
+                                console.log('Using local image URL as fallback');
+                            } catch (fallbackError) {
+                                console.error('Failed to create local image URL:', fallbackError);
+                            }
+                            // Restore button
+                            const addButton = document.getElementById('addMenuItem');
+                            addButton.innerHTML = '<i class="fas fa-plus"></i> Add Menu Item';
+                            addButton.disabled = false;
+                        }
                     }
                     
                     const newItem = {
@@ -1367,7 +1602,11 @@
                         price,
                         category,
                         stock,
-                        icon: this.getIconForCategory(category)
+                        icon: this.getIconForCategory(category),
+                        description: description || '',
+                        imageUrl: imageUrl || null,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
                     };
                     
                     POSData.menuItems.push(newItem);
@@ -1377,7 +1616,7 @@
                         soldToday: 0
                     };
                     
-                    // Save to cloud API
+                    // Save to cloud API (including imageUrl)
                     try {
                         const response = await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/menu`, {
                             method: 'POST',
@@ -1389,7 +1628,13 @@
                         });
                         
                         if (response.ok) {
-                            console.log('Menu item saved to cloud:', await response.json());
+                            const result = await response.json();
+                            console.log('Menu item saved to cloud:', result);
+                            // Update item with server response (including imageUrl if preserved)
+                            if (result.item) {
+                                if (result.item.id) newItem.id = result.item.id;
+                                if (result.item.imageUrl) newItem.imageUrl = result.item.imageUrl;
+                            }
                         } else {
                             console.error('Failed to save to cloud:', response.status, await response.text());
                         }
@@ -1402,8 +1647,12 @@
                     POS.initMenu();
                     this.updateSystemOverview();
                     
+                    // Clear form
                     document.getElementById('itemName').value = '';
                     document.getElementById('itemPrice').value = '';
+                    document.getElementById('itemDescription').value = '';
+                    document.getElementById('itemImage').value = '';
+                    imagePreview.style.display = 'none';
                     
                     alert('Menu item added successfully!');
                 });
@@ -1559,13 +1808,175 @@
             constructor() {
                 this.tableBody = document.getElementById('inventoryTableBody');
                 this.lowStockAlerts = document.getElementById('lowStockAlerts');
+                this.modal = document.getElementById('addInventoryModal');
+                this.standaloneInventory = {}; // For inventory items not linked to menu items
                 
                 document.getElementById('refreshInventory').addEventListener('click', 
-                    () => this.render());
+                    () => this.loadInventory());
                 document.getElementById('exportInventory').addEventListener('click', 
                     () => this.exportCSV());
+                document.getElementById('cancelAddInventory').addEventListener('click', 
+                    () => this.closeAddModal());
+                document.getElementById('confirmAddInventory').addEventListener('click', 
+                    () => this.createInventoryItem());
+                
+                // Close modal when clicking outside
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) this.closeAddModal();
+                });
+                
+                // Use event delegation for action buttons (works with dynamically created buttons)
+                this.tableBody.addEventListener('click', (e) => {
+                    const button = e.target.closest('button[data-action]');
+                    if (!button) return;
+                    
+                    const action = button.getAttribute('data-action');
+                    const itemId = button.getAttribute('data-item-id');
+                    
+                    if (action === 'increase') {
+                        this.adjustStock(itemId, 1);
+                    } else if (action === 'decrease') {
+                        this.adjustStock(itemId, -1);
+                    } else if (action === 'delete') {
+                        this.deleteItem(itemId);
+                    }
+                });
+                
+                this.loadInventory();
+            }
+            
+            async loadInventory() {
+                try {
+                    const response = await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/inventory`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('id_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Store standalone inventory items (items not linked to menu)
+                        data.forEach(item => {
+                            if (!POSData.menuItems.find(m => m.id === item.id)) {
+                                this.standaloneInventory[item.id] = {
+                                    id: item.id,
+                                    name: item.name,
+                                    category: item.category || 'General',
+                                    quantity: item.quantity || 0,
+                                    lowAlert: item.lowAlert || 10,
+                                    current: item.quantity || 0, // Map quantity to current for display
+                                    soldToday: item.soldToday || 0
+                                };
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading inventory:', error);
+                }
                 
                 this.render();
+            }
+            
+            openAddModal() {
+                this.modal.style.display = 'flex';
+                // Clear form
+                document.getElementById('inventoryItemId').value = '';
+                document.getElementById('inventoryItemName').value = '';
+                document.getElementById('inventoryItemCategory').value = 'General';
+                document.getElementById('inventoryItemQuantity').value = '0';
+                document.getElementById('inventoryItemLowAlert').value = '10';
+            }
+            
+            closeAddModal() {
+                this.modal.style.display = 'none';
+            }
+            
+            async createInventoryItem() {
+                const id = document.getElementById('inventoryItemId').value.trim();
+                const name = document.getElementById('inventoryItemName').value.trim();
+                const category = document.getElementById('inventoryItemCategory').value.trim() || 'General';
+                const quantity = parseInt(document.getElementById('inventoryItemQuantity').value) || 0;
+                const lowAlert = parseInt(document.getElementById('inventoryItemLowAlert').value) || 10;
+                
+                if (!id || !name) {
+                    alert('Please fill in Item ID and Item Name');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/inventory`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('id_token')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: id,
+                            name: name,
+                            category: category,
+                            quantity: quantity,
+                            lowAlert: lowAlert
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const newItem = await response.json();
+                        this.standaloneInventory[id] = {
+                            id: newItem.id,
+                            name: newItem.name,
+                            category: newItem.category,
+                            quantity: newItem.quantity,
+                            lowAlert: newItem.lowAlert,
+                            current: newItem.quantity,
+                            soldToday: 0
+                        };
+                        this.closeAddModal();
+                        this.render();
+                        alert('Inventory item added successfully!');
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Failed to add inventory item'));
+                    }
+                } catch (error) {
+                    console.error('Error creating inventory item:', error);
+                    alert('Failed to add inventory item. Please try again.');
+                }
+            }
+            
+            async deleteItem(itemId) {
+                if (!confirm('Are you sure you want to delete this inventory item?')) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/inventory/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('id_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        // Remove from standalone inventory if it exists
+                        if (this.standaloneInventory[itemId]) {
+                            delete this.standaloneInventory[itemId];
+                        }
+                        // Remove from POSData inventory
+                        if (POSData.inventory[itemId]) {
+                            delete POSData.inventory[itemId];
+                        }
+                        this.render();
+                        alert('Inventory item deleted successfully!');
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Failed to delete inventory item'));
+                    }
+                } catch (error) {
+                    console.error('Error deleting inventory item:', error);
+                    alert('Failed to delete inventory item. Please try again.');
+                }
             }
             
             render() {
@@ -1574,6 +1985,7 @@
                 
                 let lowStockCount = 0;
                 
+                // Render inventory for menu items
                 POSData.menuItems.forEach(item => {
                     const inventory = POSData.inventory[item.id];
                     if (!inventory) return;
@@ -1593,8 +2005,40 @@
                         <td>${inventory.soldToday}</td>
                         <td><span class="${statusClass}">${statusText}</span></td>
                         <td>
-                            <button class="qty-btn" onclick="Inventory.adjustStock('${item.id}', 1)">+</button>
-                            <button class="qty-btn" onclick="Inventory.adjustStock('${item.id}', -1)">-</button>
+                            <button class="qty-btn" data-action="increase" data-item-id="${item.id}">+</button>
+                            <button class="qty-btn" data-action="decrease" data-item-id="${item.id}">-</button>
+                            <button class="qty-btn" data-action="delete" data-item-id="${item.id}" style="background: #e74c3c; margin-left: 5px;" title="Delete Item">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    this.tableBody.appendChild(tr);
+                });
+                
+                // Render standalone inventory items
+                Object.values(this.standaloneInventory).forEach(invItem => {
+                    const current = invItem.current || invItem.quantity || 0;
+                    const lowAlert = invItem.lowAlert || 10;
+                    const isLow = current <= lowAlert;
+                    const statusClass = isLow ? 'stock-low' : 'stock-ok';
+                    const statusText = isLow ? 'LOW STOCK' : 'In Stock';
+                    
+                    if (isLow) lowStockCount++;
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${invItem.name}</strong></td>
+                        <td>${invItem.category || 'General'}</td>
+                        <td class="${statusClass}">${current}</td>
+                        <td>${lowAlert}</td>
+                        <td>${invItem.soldToday || 0}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="qty-btn" data-action="increase" data-item-id="${invItem.id}">+</button>
+                            <button class="qty-btn" data-action="decrease" data-item-id="${invItem.id}">-</button>
+                            <button class="qty-btn" data-action="delete" data-item-id="${invItem.id}" style="background: #e74c3c; margin-left: 5px;" title="Delete Item">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     `;
                     this.tableBody.appendChild(tr);
@@ -1624,6 +2068,7 @@
             }
             
             adjustStock(itemId, change) {
+                // Check if it's a menu item inventory
                 if (POSData.inventory[itemId]) {
                     POSData.inventory[itemId].current += change;
                     if (POSData.inventory[itemId].current < 0) {
@@ -1631,14 +2076,53 @@
                     }
                     POSData.updateInventoryInCloud(itemId, POSData.inventory[itemId].current);
                     this.render();
+                } 
+                // Check if it's a standalone inventory item
+                else if (this.standaloneInventory[itemId]) {
+                    const inv = this.standaloneInventory[itemId];
+                    const currentQty = inv.current !== undefined ? inv.current : (inv.quantity || 0);
+                    inv.current = currentQty + change;
+                    inv.quantity = inv.current; // Keep quantity in sync
+                    if (inv.current < 0) {
+                        inv.current = 0;
+                        inv.quantity = 0;
+                    }
+                    // Update in cloud
+                    this.updateInventoryInCloud(itemId, inv.current);
+                    this.render();
+                }
+            }
+            
+            async updateInventoryInCloud(itemId, quantity) {
+                try {
+                    await fetch(`${CLOUD_CONFIG.API_ENDPOINT}/inventory/${itemId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('id_token')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ quantity })
+                    });
+                } catch (error) {
+                    console.error('Error updating inventory:', error);
                 }
             }
             
             exportCSV() {
                 let csv = 'Item Name,Category,Current Stock,Low Stock Alert,Sold Today\n';
+                
+                // Export menu item inventory
                 POSData.menuItems.forEach(item => {
                     const inv = POSData.inventory[item.id];
-                    csv += `"${item.name}","${item.category}",${inv.current},${inv.lowAlert},${inv.soldToday}\n`;
+                    if (inv) {
+                        csv += `"${item.name}","${item.category}",${inv.current},${inv.lowAlert},${inv.soldToday}\n`;
+                    }
+                });
+                
+                // Export standalone inventory items
+                Object.values(this.standaloneInventory).forEach(invItem => {
+                    const current = invItem.current !== undefined ? invItem.current : (invItem.quantity || 0);
+                    csv += `"${invItem.name}","${invItem.category || 'General'}",${current},${invItem.lowAlert || 10},${invItem.soldToday || 0}\n`;
                 });
                 
                 const blob = new Blob([csv], {type: 'text/csv'});
@@ -1651,6 +2135,207 @@
                 alert('Inventory data exported as CSV');
             }
         }
+
+        // ====================
+        // ADMIN AUTHENTICATION
+        // ====================
+        const AdminAuth = {
+            // Default admin credentials (in production, use secure authentication)
+            adminCredentials: {
+                'admin': 'admin123',
+                'manager': 'manager123'
+            },
+            
+            isAuthenticated() {
+                const adminSession = localStorage.getItem('adminSession');
+                if (!adminSession) return false;
+                
+                try {
+                    const session = JSON.parse(adminSession);
+                    // Check if session is still valid (24 hours)
+                    const now = Date.now();
+                    if (now - session.timestamp > 24 * 60 * 60 * 1000) {
+                        this.logout();
+                        return false;
+                    }
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+            
+            getCurrentAdmin() {
+                const adminSession = localStorage.getItem('adminSession');
+                if (!adminSession) return null;
+                
+                try {
+                    const session = JSON.parse(adminSession);
+                    return session.username;
+                } catch (e) {
+                    return null;
+                }
+            },
+            
+            login(username, password) {
+                // Check credentials
+                if (this.adminCredentials[username] === password) {
+                    const session = {
+                        username: username,
+                        timestamp: Date.now(),
+                        role: 'admin'
+                    };
+                    localStorage.setItem('adminSession', JSON.stringify(session));
+                    return true;
+                }
+                return false;
+            },
+            
+            logout() {
+                localStorage.removeItem('adminSession');
+                this.hideAdminPanel();
+            },
+            
+            showAdminPanel() {
+                const adminTab = document.getElementById('admin-tab');
+                const adminProfileInfo = document.getElementById('adminProfileInfo');
+                const adminDisplayName = document.getElementById('adminDisplayName');
+                const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+                
+                if (adminTab) {
+                    adminTab.style.display = 'block';
+                }
+                
+                const currentAdmin = this.getCurrentAdmin();
+                if (currentAdmin) {
+                    if (adminProfileInfo) adminProfileInfo.style.display = 'block';
+                    if (adminDisplayName) adminDisplayName.textContent = currentAdmin;
+                    if (adminLogoutBtn) adminLogoutBtn.style.display = 'block';
+                }
+            },
+            
+            hideAdminPanel() {
+                const adminTab = document.getElementById('admin-tab');
+                const adminProfileInfo = document.getElementById('adminProfileInfo');
+                const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+                
+                if (adminTab) {
+                    adminTab.style.display = 'none';
+                }
+                if (adminProfileInfo) adminProfileInfo.style.display = 'none';
+                if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
+            },
+            
+            init() {
+                // Check if already authenticated
+                if (this.isAuthenticated()) {
+                    this.showAdminPanel();
+                } else {
+                    this.hideAdminPanel();
+                }
+                
+                // Admin login modal handlers
+                const adminLoginModal = document.getElementById('adminLoginModal');
+                const confirmAdminLogin = document.getElementById('confirmAdminLogin');
+                const cancelAdminLogin = document.getElementById('cancelAdminLogin');
+                const adminLoginError = document.getElementById('adminLoginError');
+                
+                const performLogin = () => {
+                    const username = document.getElementById('adminLoginUsername').value.trim();
+                    const password = document.getElementById('adminLoginPassword').value;
+                    
+                    if (!username || !password) {
+                        if (adminLoginError) {
+                            adminLoginError.textContent = 'Please enter both username and password';
+                            adminLoginError.style.display = 'block';
+                        }
+                        return;
+                    }
+                    
+                    if (this.login(username, password)) {
+                        // Success
+                        if (adminLoginModal) adminLoginModal.style.display = 'none';
+                        if (adminLoginError) adminLoginError.style.display = 'none';
+                        document.getElementById('adminLoginUsername').value = '';
+                        document.getElementById('adminLoginPassword').value = '';
+                        this.showAdminPanel();
+                        // Switch to admin tab
+                        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        document.querySelector('.nav-tab[data-tab="admin-tab"]').classList.add('active');
+                        document.getElementById('admin-tab').classList.add('active');
+                        alert('Login successful! Welcome, ' + username);
+                    } else {
+                        // Failed
+                        if (adminLoginError) {
+                            adminLoginError.textContent = 'Invalid username or password';
+                            adminLoginError.style.display = 'block';
+                        }
+                    }
+                };
+                
+                if (confirmAdminLogin) {
+                    confirmAdminLogin.addEventListener('click', performLogin);
+                }
+                
+                // Enter key support
+                const adminLoginPassword = document.getElementById('adminLoginPassword');
+                if (adminLoginPassword) {
+                    adminLoginPassword.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            performLogin();
+                        }
+                    });
+                }
+                
+                const adminLoginUsername = document.getElementById('adminLoginUsername');
+                if (adminLoginUsername) {
+                    adminLoginUsername.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            document.getElementById('adminLoginPassword').focus();
+                        }
+                    });
+                }
+                
+                if (cancelAdminLogin) {
+                    cancelAdminLogin.addEventListener('click', () => {
+                        if (adminLoginModal) adminLoginModal.style.display = 'none';
+                        if (adminLoginError) adminLoginError.style.display = 'none';
+                        document.getElementById('adminLoginUsername').value = '';
+                        document.getElementById('adminLoginPassword').value = '';
+                        // Switch back to POS tab
+                        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        document.querySelector('.nav-tab[data-tab="pos-tab"]').classList.add('active');
+                        document.getElementById('pos-tab').classList.add('active');
+                    });
+                }
+                
+                // Logout handler
+                const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+                if (adminLogoutBtn) {
+                    adminLogoutBtn.addEventListener('click', () => {
+                        if (confirm('Are you sure you want to logout?')) {
+                            this.logout();
+                            alert('Logged out successfully');
+                            // Switch to POS tab
+                            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                            document.querySelector('.nav-tab[data-tab="pos-tab"]').classList.add('active');
+                            document.getElementById('pos-tab').classList.add('active');
+                        }
+                    });
+                }
+                
+                // Close modal when clicking outside
+                if (adminLoginModal) {
+                    adminLoginModal.addEventListener('click', (e) => {
+                        if (e.target === adminLoginModal) {
+                            adminLoginModal.style.display = 'none';
+                        }
+                    });
+                }
+            }
+        };
 
         // ====================
         // MAIN POS APPLICATION
@@ -1668,6 +2353,7 @@
                 this.adminPanel = new AdminPanel();
                 this.salesReports = new SalesReports();
                 this.inventoryTracker = new InventoryTracker();
+                AdminAuth.init();
                 
                 this.initNavigation();
                 this.initMenu();
@@ -1678,6 +2364,20 @@
             initNavigation() {
                 document.querySelectorAll('.nav-tab').forEach(tab => {
                     tab.addEventListener('click', () => {
+                        // Check if trying to access admin tab
+                        if (tab.dataset.tab === 'admin-tab') {
+                            if (!AdminAuth.isAuthenticated()) {
+                                // Show login modal
+                                const adminLoginModal = document.getElementById('adminLoginModal');
+                                if (adminLoginModal) {
+                                    adminLoginModal.style.display = 'flex';
+                                    document.getElementById('adminLoginUsername').focus();
+                                }
+                                // Don't switch tabs
+                                return;
+                            }
+                        }
+                        
                         document.querySelectorAll('.tab-content').forEach(content => {
                             content.classList.remove('active');
                         });
@@ -1708,8 +2408,22 @@
                     const menuItem = document.createElement('div');
                     menuItem.className = 'menu-item';
                     menuItem.dataset.category = item.category;
+                    
+                    // Use image if available, otherwise use icon
+                    let imageHtml = '';
+                    if (item.imageUrl) {
+                        // Create a unique key for the image to force refresh if needed
+                        const imageKey = item.imageUrl.includes('blob:') ? item.imageUrl : `${item.imageUrl}?t=${Date.now()}`;
+                        imageHtml = `<img src="${imageKey}" alt="${item.name}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; background: #f0f0f0;" 
+                           onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                           onload="this.style.display='block'; if(this.nextElementSibling) this.nextElementSibling.style.display='none';">
+                           <div class="item-icon" style="display: none; font-size: 32px; margin-bottom: 12px; color: #d22c26; justify-content: center; align-items: center; height: 120px;">${item.icon || '🍩'}</div>`;
+                    } else {
+                        imageHtml = `<div class="item-icon">${item.icon || '🍩'}</div>`;
+                    }
+                    
                     menuItem.innerHTML = `
-                        <div class="item-icon">${item.icon}</div>
+                        ${imageHtml}
                         <div class="item-name">${item.name}</div>
                         <div class="item-price">RM ${item.price.toFixed(2)}</div>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">
@@ -1956,7 +2670,7 @@
             initAuth();
         });
 
-        // Make Inventory tracker globally accessible
+        // Make Inventory tracker globally accessible (for backward compatibility)
         window.Inventory = null;
         
         // Initialize Inventory after POS is initialized

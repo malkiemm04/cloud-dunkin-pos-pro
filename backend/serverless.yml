@@ -8,6 +8,8 @@ provider:
     MENU_TABLE: ${self:service}-menu-${opt:stage, 'dev'}
     ORDERS_TABLE: ${self:service}-orders-${opt:stage, 'dev'}
     INVENTORY_TABLE: ${self:service}-inventory-${opt:stage, 'dev'}
+    IMAGES_BUCKET: dunkin-pos-images-${opt:stage, 'dev'}
+    IMAGES_CDN_DOMAIN: ${env:IMAGES_CDN_DOMAIN, 'd1234567890.cloudfront.net'}
   
   iamRoleStatements:
     - Effect: Allow
@@ -20,6 +22,19 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:service}-*"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - "arn:aws:s3:::dunkin-pos-images-${opt:stage, 'dev'}/*"
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::dunkin-pos-images-${opt:stage, 'dev'}"
 
 functions:
   getMenu:
@@ -35,6 +50,13 @@ functions:
               - Authorization
             allowCredentials: false
   
+  getMenuOptions:
+    handler: handlers/cors.handleOptions
+    events:
+      - http:
+          path: menu
+          method: options
+  
   createMenuItem:
     handler: handlers/menu.createMenuItem
     events:
@@ -49,6 +71,72 @@ functions:
             allowCredentials: false
       - http:
           path: menu
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+  
+  updateMenuItem:
+    handler: handlers/menu.updateMenuItem
+    events:
+      - http:
+          path: menu/{id}
+          method: put
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: menu/{id}
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+  
+  deleteMenuItem:
+    handler: handlers/menu.deleteMenuItem
+    events:
+      - http:
+          path: menu/{id}
+          method: delete
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: menu/{id}
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+  
+  getUploadUrl:
+    handler: handlers/images.getUploadUrl
+    events:
+      - http:
+          path: images/upload-url
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: images/upload-url
           method: options
           cors:
             origin: '*'
@@ -92,6 +180,13 @@ functions:
               - Authorization
             allowCredentials: false
   
+  getOrdersOptions:
+    handler: handlers/cors.handleOptions
+    events:
+      - http:
+          path: orders
+          method: options
+  
   updateInventory:
     handler: handlers/inventory.updateInventory
     events:
@@ -120,6 +215,57 @@ functions:
       - http:
           path: inventory
           method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+  
+  getInventoryOptions:
+    handler: handlers/cors.handleOptions
+    events:
+      - http:
+          path: inventory
+          method: options
+  
+  createInventory:
+    handler: handlers/inventory.createInventory
+    events:
+      - http:
+          path: inventory
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: inventory
+          method: options
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+  
+  deleteInventory:
+    handler: handlers/inventory.deleteInventory
+    events:
+      - http:
+          path: inventory/{id}
+          method: delete
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: false
+      - http:
+          path: inventory/{id}
+          method: options
           cors:
             origin: '*'
             headers:

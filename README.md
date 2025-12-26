@@ -8,11 +8,14 @@ A cloud-native Point of Sale system for Dunkin' Donuts built with AWS serverless
 - ✅ **Serverless backend** (AWS Lambda Functions)
 - ✅ **Managed database** (AWS DynamoDB - NoSQL)
 - ✅ **CDN caching** via CloudFront for global performance
+- ✅ **Image upload & storage** via S3 + CloudFront CDN
+- ✅ **Public read-only menu page** (no authentication required)
 - ✅ **User authentication** with AWS Cognito (ready for integration)
 - ✅ **Real-time monitoring** with CloudWatch dashboards
 - ✅ **Cost control** with AWS Budgets alerts
 - ✅ **Infrastructure as Code** with Terraform
 - ✅ **CI/CD ready** with GitHub Actions
+- ✅ **Complete CRUD operations** for Menu, Orders, and Inventory
 
 ## 📐 Architecture
 
@@ -81,10 +84,6 @@ cloud-dunkin-pos-pro/
 │       ├── main.tf         # Main infrastructure
 │       ├── variables.tf    # Terraform variables
 │       └── outputs.tf      # Output values
-├── cicd/
-│   └── .github/workflows/
-│       ├── deploy-frontend.yml
-│       └── deploy-backend.yml
 └── README.md
 ```
 
@@ -120,6 +119,68 @@ aws configure
 # Enter your AWS Secret Access Key
 # Set default region: us-east-1
 ```
+
+### 4. Install Frontend Dependencies (for Local Development)
+
+```bash
+cd frontend
+npm install
+```
+
+## 💻 Local Development
+
+### Running the Frontend Locally
+
+**Important:** To avoid CORS errors, you must run the frontend through a local web server instead of opening the HTML file directly (`file://`).
+
+#### Option 1: Using the Frontend Package (Recommended)
+
+```bash
+cd frontend
+npm install  # First time only
+npm start    # Starts server on http://localhost:8080
+```
+
+Then open your browser and navigate to: **`http://localhost:8080`**
+
+#### Option 2: Using Python (if you have Python installed)
+
+```bash
+cd frontend
+# Python 3
+python -m http.server 8080
+
+# Python 2
+python -m SimpleHTTPServer 8080
+```
+
+Then open: **`http://localhost:8080`**
+
+#### Option 3: Using Node.js http-server (if installed globally)
+
+```bash
+cd frontend
+npx http-server -p 8080
+```
+
+### Running the Backend Locally (Optional)
+
+If you want to test against a local backend instead of the deployed AWS API:
+
+```bash
+cd backend
+npm install
+npm start  # Starts serverless-offline on http://localhost:3000
+```
+
+The frontend is already configured to automatically use `http://localhost:3000` when running on localhost.
+
+### Troubleshooting CORS Issues
+
+If you encounter CORS errors:
+1. **Make sure you're accessing via `http://localhost:8080`** (not `file://`)
+2. **Check that your backend API has CORS headers configured** (already done in this project)
+3. **Verify the API endpoint** in `frontend/index.html` matches your deployed API Gateway URL
 
 ## 🚀 Deployment
 
@@ -181,8 +242,10 @@ All endpoints are prefixed with your API Gateway URL: `https://YOUR_API.execute-
 
 ### Menu Endpoints
 
-- `GET /menu` - Retrieve all menu items
+- `GET /menu` - Retrieve all menu items (public, no auth required)
 - `POST /menu` - Create a new menu item
+- `PUT /menu/{id}` - Update a menu item
+- `DELETE /menu/{id}` - Delete a menu item
 
 ### Order Endpoints
 
@@ -193,6 +256,10 @@ All endpoints are prefixed with your API Gateway URL: `https://YOUR_API.execute-
 
 - `GET /inventory` - Retrieve inventory status
 - `PUT /inventory/{id}` - Update inventory quantity
+
+### Image Upload Endpoints
+
+- `POST /images/upload-url` - Get presigned URL for image upload
 
 ### Authentication Endpoints
 
@@ -262,10 +329,7 @@ curl -X POST https://YOUR_API.execute-api.us-east-1.amazonaws.com/dev/orders \
 
 ## 🔄 CI/CD Pipeline
 
-GitHub Actions workflows are configured in `.github/workflows/`:
-
-- **deploy-frontend.yml**: Automatically deploys frontend to S3 on push to main
-- **deploy-backend.yml**: Automatically deploys backend Lambda functions
+CI/CD can be configured using GitHub Actions workflows for automated deployment of both frontend and backend components.
 
 **Setup GitHub Secrets:**
 - `AWS_ACCESS_KEY_ID`

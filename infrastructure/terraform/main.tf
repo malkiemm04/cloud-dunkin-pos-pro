@@ -223,6 +223,115 @@ resource "aws_budgets_budget" "monthly" {
   }
 }
 
+# S3 Bucket for Images/Media
+resource "aws_s3_bucket" "images" {
+  bucket = "dunkin-pos-images-${terraform.workspace != "default" ? terraform.workspace : "dev"}"
+  tags = {
+    Name        = "DunkinPOSImages"
+    Environment = terraform.workspace != "default" ? terraform.workspace : "dev"
+    Project     = "CloudDunkinPOS"
+  }
+}
+
+# Enable versioning for images
+resource "aws_s3_bucket_versioning" "images" {
+  bucket = aws_s3_bucket.images.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Block public access (CloudFront will serve images)
+resource "aws_s3_bucket_public_access_block" "images" {
+  bucket = aws_s3_bucket.images.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# CloudFront Origin Access Identity for Images
+resource "aws_cloudfront_origin_access_identity" "images" {
+  comment = "OAI for Dunkin POS Images"
+}
+
+# S3 Bucket Policy for Images (CloudFront access)
+resource "aws_s3_bucket_policy" "images" {
+  bucket = aws_s3_bucket.images.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = aws_cloudfront_origin_access_identity.images.iam_arn
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.images.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action = [
+          "s3:PutObject",
+          "s3:PutObjectAcl",
+          "s3:GetObject"
+        ]
+        Resource = "${aws_s3_bucket.images.arn}/*"
+      }
+    ]
+  })
+}
+
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+# CloudFront Distribution for Images (separate from frontend)
+resource "aws_cloudfront_distribution" "images_cdn" {
+  origin {
+    domain_name = aws_s3_bucket.images.bucket_regional_domain_name
+    origin_id   = "S3ImagesOrigin"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.images.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+  comment             = "Dunkin POS Images CDN"
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3ImagesOrigin"
+
+    cache_policy_id = aws_cloudfront_cache_policy.frontend.id
+
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  tags = {
+    Name = "DunkinPOS-Images-CDN"
+  }
+}
+
 # Outputs
 output "cloudfront_distribution_id" {
   value       = aws_cloudfront_distribution.cdn.id
@@ -242,4 +351,14 @@ output "s3_bucket_name" {
 output "s3_bucket_arn" {
   value       = aws_s3_bucket.frontend.arn
   description = "S3 Bucket ARN"
+}
+
+output "images_bucket_name" {
+  value       = aws_s3_bucket.images.id
+  description = "S3 Bucket Name for Images"
+}
+
+output "images_cdn_url" {
+  value       = "https://${aws_cloudfront_distribution.images_cdn.domain_name}"
+  description = "CloudFront URL for serving images"
 }
